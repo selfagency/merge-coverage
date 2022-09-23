@@ -49,16 +49,9 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const recursive = require('${{ github.workspace }}/node_modules/recursive-readdir');
           const coverageDir = core.getInput('coverage-reports');
-
-          const coverageContents = async (coverageDir) => {
-            return (await recursive(coverageDir)).filter((item) =>
-              item.includes('coverage-final.json'),
-            );
-          };
-
-          core.setOutput('coverage-files', JSON.stringify(await coverageContents(coverageDir)));
+          const files = glob.create(`${coverageDir}/**/*.json`);
+          core.setOutput('coverage-files', JSON.stringify(await files.globGenerator());
 
     - name: Merge coverage reports
       id: merge-coverage

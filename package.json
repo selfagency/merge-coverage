@@ -1,6 +1,6 @@
 {
   "name": "merge-coverage",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Merge Istanbul coverage reports",
   "repository": {
     "type": "git",
@@ -24,13 +24,9 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.6.0",
-    "@actions/exec": "^1.1.1",
-    "@actions/io": "^1.1.2",
     "istanbul-lib-coverage": "^3.2.0",
     "istanbul-reports": "^3.1.5",
-    "nyc": "^15.1.0",
-    "recursive-readdir": "^2.2.2"
+    "nyc": "^15.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.7.18",
