@@ -14,8 +14,15 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
+      - name: Check package version
+        id: check
+        uses: 'EndBug/version-check@v1'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          diff-search: true
+
       - name: Test action
-        uses: selfagency/merge-coverage@v1.0.3
+        uses: selfagency/merge-coverage@v${{ steps.check.outputs.version}}
         with:
           coverage-reports: ${{ github.workspace }}/testdata
           output-folder: ${{ github.workspace }}/testresults

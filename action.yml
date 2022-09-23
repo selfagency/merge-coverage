@@ -49,7 +49,7 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const recursive = await import('${{ github.workspace }}/node_modules/recursive-readdir');
+          const recursive = require('${{ github.workspace }}/node_modules/recursive-readdir');
           const coverageDir = core.getInput('coverage-reports');
 
           const coverageContents = async (coverageDir) => {
@@ -65,8 +65,8 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const istanbul = await import('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
-          const {readFile} = await import('fs/promises');
+          const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
+          const {readFile} = require('fs/promises');
           const outputDir = core.getInput('output-folder');
           const coverageFiles = JSON.parse(steps.get-coverage-files.outputs.coverage-files);
 
@@ -91,6 +91,7 @@ runs:
     - name: Configure reporters
       id: configure-reporters
       uses: actions/github-script@v6
+      if: ${{ !steps.merge-coverage.outputs.skip }}
       with:
         script: |
           const reporters = core.getInput('formats').split(',');
@@ -102,6 +103,7 @@ runs:
 
     - name: Output coverage reports
       shell: bash
+      if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
         ln -s ${{ inputs.coverage-reports }} coverage
         nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}'
