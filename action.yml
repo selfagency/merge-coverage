@@ -77,6 +77,7 @@ runs:
 
             core.debug(`Merged reports: ${JSON.stringify(map)}`);
             await io.mkdirP(outputDir);
+            await io.mkdirP('${{ github.workspace }}/.nyc_output');
             await writeFile(`${outputDir}/coverage-final.json`, JSON.stringify(map));
           } else {
             core.notice('No coverage files found');
