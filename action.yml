@@ -75,7 +75,7 @@ runs:
               }
             }
 
-            await io.mkdirP('outputDir');
+            await io.mkdirP(outputDir);
             await writeFile(`${outputDir}/coverage-final.json`, JSON.stringify(map));
           } else {
             core.notice('No coverage files found');
