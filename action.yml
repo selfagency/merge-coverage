@@ -68,9 +68,11 @@ runs:
             const map = istanbul.createCoverageMap({});
             for (const file of coverageFiles) {
               core.debug(file);
-              const data = await readFile(`${coverageDir}/${file}`, 'utf8');
-              core.debug(data);
-              map.merge(JSON.parse(data));
+              if (file.endsWith('coverage-report.json')) {
+                const data = await readFile(`${coverageDir}/${file}`, 'utf8');
+                core.debug(data);
+                map.merge(JSON.parse(data));
+              }
             }
 
             await mkdirP(outputDir);
