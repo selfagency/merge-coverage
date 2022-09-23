@@ -51,7 +51,7 @@ runs:
         script: |
           const coverageDir = core.getInput('coverage-reports');
           const files = glob.create(`${coverageDir}/**/*.json`);
-          core.setOutput('coverage-files', JSON.stringify(await files.globGenerator());
+          core.setOutput('coverage-files', JSON.stringify(await files.globGenerator()));
 
     - name: Merge coverage reports
       id: merge-coverage
