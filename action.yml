@@ -65,7 +65,7 @@ runs:
 
           if (coverageFiles.length) {
             const map = istanbul.createCoverageMap({});
-            for (const file of files) {
+            for (const file of coverageFiles) {
               core.debug(file);
               if (file.endsWith('coverage-final.json')) {
                 const data = await readFile(file, 'utf8');
