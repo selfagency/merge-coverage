@@ -61,7 +61,7 @@ runs:
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile, writeFile} = require('fs/promises');
           const coverageDir = '${{ inputs.coverage-reports }}';
-          const outputDir = '${{ github.workspace }}/.nyc_output';
+          const outputDir = '${{ inputs.output-folder }}';
           const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
 
           if (coverageFiles.length) {
@@ -100,8 +100,6 @@ runs:
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
-        ln -s ${{ inputs.coverage-reports }} coverage
-        cp ${{ github.workspace}}/.nyc_output/coverage-final.json ${{ inputs.output-folder }}
         ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output'
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
