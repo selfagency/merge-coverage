@@ -61,7 +61,7 @@ runs:
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile} = require('fs/promises');
           const outputDir = core.getInput('output-folder');
-          const coverageFiles = JSON.parse('${{ steps.get-coverage-files.outputs.paths }}');
+          const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
 
           if (coverageFiles.length) {
             const map = istanbul.createCoverageMap({});
