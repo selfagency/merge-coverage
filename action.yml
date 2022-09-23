@@ -60,6 +60,7 @@ runs:
         script: |
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile} = require('fs/promises');
+          const coverageDir = core.getInput('coverage-reports');
           const outputDir = core.getInput('output-folder');
           const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
 
@@ -67,11 +68,9 @@ runs:
             const map = istanbul.createCoverageMap({});
             for (const file of coverageFiles) {
               core.debug(file);
-              if (file.endsWith('coverage-final.json')) {
-                const data = await readFile(file, 'utf8');
-                core.debug(data);
-                map.merge(JSON.parse(data));
-              }
+              const data = await readFile(`${coverageDir}/${file}`, 'utf8');
+              core.debug(data);
+              map.merge(JSON.parse(data));
             }
 
             await mkdirP(outputDir);

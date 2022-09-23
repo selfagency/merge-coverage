@@ -16,6 +16,6 @@ jobs:
       - name: Test action
         uses: selfagency/merge-coverage@main
         with:
-          coverage-reports: ${{ github.workspace }}/testdata
+          coverage-reports: ${{ github.workspace }}/testdata/coverage
           output-folder: ${{ github.workspace }}/testresults
           formats: lcov,json,html
