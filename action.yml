@@ -1,0 +1,108 @@
+name: 'Merge coverage reports'
+author: 'selfagency'
+description: 'Merge Istanbul coverage reports'
+branding:
+  icon: 'git-merge'
+  color: 'green'
+inputs:
+  coverage-reports:
+    description: 'Path to coverage reports'
+    type: string
+    required: true
+  output-folder:
+    description: 'Where to output results'
+    type: string
+    required: true
+  formats:
+    description: 'Comma-separated list of formats to output'
+    type: string
+    required: true
+outputs:
+  summary:
+    description: 'Coverage summary'
+    value: steps.merge-coverage.outputs.summary
+  json:
+    description: 'JSON coverage summary'
+    value: steps.merge-coverage.outputs.json
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile --non-interactive --prefer-offline
+
+    - name: Get coverage files
+      id: get-coverage-files
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const recursive = await import('recursive-readdir');
+          const coverageDir = core.getInput('coverage-reports');
+
+          const coverageContents = async (coverageDir) => {
+            return (await recursive(coverageDir)).filter((item) =>
+              item.includes('coverage-final.json'),
+            );
+          };
+
+          core.setOutput('coverage-files', JSON.stringify(await coverageContents(coverageDir)));
+
+    - name: Merge coverage reports
+      id: merge-coverage
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const istanbul = await import('istanbul-lib-coverage');
+          const {readFile} = await import('fs/promises');
+          const outputDir = core.getInput('output-folder');
+          const coverageFiles = JSON.parse(steps.get-coverage-files.outputs.coverage-files);
+
+          if (coverageFiles.length) {
+            const map = istanbul.createCoverageMap({});
+            for (const file of files) {
+              core.debug(file);
+              if (file.endsWith('coverage-final.json')) {
+                const data = await readFile(file, 'utf8');
+                core.debug(data);
+                map.merge(JSON.parse(data));
+              }
+            }
+
+            await mkdirP(outputDir);
+            await write(`${outputDir}/coverage-final.json`, JSON.stringify(map));
+          } else {
+            core.notice('No coverage files found');
+            core.setOutput('skip', true);
+          }
+
+    - name: Configure reporters
+      id: configure-reporters
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const reporters = core.getInput('formats').split(',');
+          let reporterConfig = '';
+          reporters.forEach(reporter => {
+            reporterConfig += `--reporter ${reporter} `;
+          });
+          core.setOutput('reporters', reporterConfig);
+
+    - name: Output coverage reports
+      run: |
+        ln -s ${{ inputs.coverage-reports }} coverage
+        nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}'
+        echo "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
+        echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
+        echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
