@@ -49,7 +49,7 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const recursive = await import('recursive-readdir');
+          const recursive = await import('${{ github.workspace }}/node_modules/recursive-readdir');
           const coverageDir = core.getInput('coverage-reports');
 
           const coverageContents = async (coverageDir) => {
@@ -65,7 +65,7 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const istanbul = await import('istanbul-lib-coverage');
+          const istanbul = await import('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile} = await import('fs/promises');
           const outputDir = core.getInput('output-folder');
           const coverageFiles = JSON.parse(steps.get-coverage-files.outputs.coverage-files);
