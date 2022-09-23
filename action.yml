@@ -101,7 +101,7 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
         ln -s ${{ inputs.coverage-reports }} coverage
-        cp '${{ github.workspace}}/.nyc_output/coverage-final.json' coverage
+        cp ${{ github.workspace}}/.nyc_output/coverage-final.json ${{ inputs.output-folder }}
         ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output'
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
