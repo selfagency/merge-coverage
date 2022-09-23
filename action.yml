@@ -42,7 +42,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: yarn install --frozen-lockfile --non-interactive --prefer-offline
+      run: npm ci
 
     - name: Get coverage files
       id: get-coverage-files
