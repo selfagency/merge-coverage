@@ -60,8 +60,8 @@ runs:
         script: |
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile} = require('fs/promises');
-          const coverageDir = core.getInput('coverage-reports');
-          const outputDir = core.getInput('output-folder');
+          const coverageDir = '${{ inputs.coverage-reports }}';
+          const outputDir = '${{ inputs.output-folder }}';
           const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
 
           if (coverageFiles.length) {
@@ -86,7 +86,7 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       with:
         script: |
-          const reporters = core.getInput('formats').split(',');
+          const reporters = '${{ inputs.formats }}'.split(',');
           let reporterConfig = '';
           reporters.forEach(reporter => {
             reporterConfig += `--reporter ${reporter} `;
