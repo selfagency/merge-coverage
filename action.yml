@@ -46,16 +46,12 @@ runs:
 
     - name: Get coverage files
       id: get-coverage-files
-      uses: actions/github-script@v6
+      uses: tj-actions/glob@v13.1
+      working-directory: ${{ inputs.coverage-reports }}
       with:
-        script: |
-          const coverageDir = core.getInput('coverage-reports');
-          const files = glob.create(`${coverageDir}/**/*.json`);
-          core.debug(files);
-          core.debug(files.glob);
-          core.debug(files.glob());
-          core.debug(files.globGenerator);
-          core.setOutput('coverage-files', JSON.stringify(await files.globGenerator()));
+        separator: ','
+        files: |
+          **/*.json
 
     - name: Merge coverage reports
       id: merge-coverage
