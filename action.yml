@@ -75,6 +75,7 @@ runs:
               }
             }
 
+            core.debug(JSON.stringify(map));
             await io.mkdirP(outputDir);
             await writeFile(`${outputDir}/coverage-final.json`, JSON.stringify(map));
           } else {
@@ -100,11 +101,10 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
         ln -s ${{ inputs.coverage-reports }} coverage
-        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output'
-        ls -la '${{ inputs.output-folder }}'
-        echo "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
+        summary=$(${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output' 2>&1)
+        echo "::set-output name=summary::$summary"
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
-        echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
+        echo "::notice::$summary"
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v2
