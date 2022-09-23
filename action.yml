@@ -100,8 +100,8 @@ runs:
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
-        ln -s ${{ inputs.coverage-reports }} coverage
-        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output'
+        cat .nyc_output/out.json
+        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
@@ -109,4 +109,6 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       with:
         name: coverage-reports
-        path: ${{ inputs.output-folder }}
+        path: |
+          ${{ inputs.output-folder }}
+          ${{ github.workspace }}/.nyc_output
