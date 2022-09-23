@@ -100,11 +100,10 @@ runs:
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
+        cat '${{ github.workspace}}/.nyc_output/coverage-final.json'
         ln -s ${{ inputs.coverage-reports }} coverage
-        summary=$(${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output' 2>&1)
-        echo "::set-output name=summary::$summary"
+        echo "::notice::$(${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output')"
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
-        echo "::notice::Coverage summary:\n\n$summary"
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v2
