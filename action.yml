@@ -4,6 +4,7 @@ description: 'Merge Istanbul coverage reports'
 branding:
   icon: 'git-merge'
   color: 'green'
+shell: bash
 inputs:
   coverage-reports:
     description: 'Path to coverage reports'
