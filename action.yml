@@ -47,8 +47,8 @@ runs:
     - name: Get coverage files
       id: get-coverage-files
       uses: tj-actions/glob@v13.1
-      working-directory: ${{ inputs.coverage-reports }}
       with:
+        working-directory: ${{ inputs.coverage-reports }}
         separator: ','
         files: |
           **/*.json
