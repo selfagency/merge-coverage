@@ -59,7 +59,7 @@ runs:
       with:
         script: |
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
-          const {readFile} = require('fs/promises');
+          const {readFile, writeFile} = require('fs/promises');
           const coverageDir = '${{ inputs.coverage-reports }}';
           const outputDir = '${{ inputs.output-folder }}';
           const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
@@ -75,8 +75,8 @@ runs:
               }
             }
 
-            await mkdirP(outputDir);
-            await write(`${outputDir}/coverage-final.json`, JSON.stringify(map));
+            await io.mkdirP(outputDir);
+            await writeFile(`${outputDir}/coverage-final.json`, JSON.stringify(map));
           } else {
             core.notice('No coverage files found');
             core.setOutput('skip', true);
