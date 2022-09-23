@@ -61,6 +61,7 @@ runs:
           const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
           const {readFile, writeFile} = require('fs/promises');
           const coverageDir = '${{ inputs.coverage-reports }}';
+          const outputDir = '${{ github.workspace }}/.nyc_output';
           const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
 
           if (coverageFiles.length) {
@@ -75,7 +76,8 @@ runs:
             }
 
             core.debug(`Merged reports: ${JSON.stringify(map)}`);
-            await writeFile(`${coverageDir}/coverage-final.json`, JSON.stringify(map));
+            await io.mkdirP(outputDir);
+            await writeFile(`${outputDir}/out.json`, JSON.stringify(map));
           } else {
             core.notice('No coverage files found');
             core.setOutput('skip', true);
@@ -98,9 +100,8 @@ runs:
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       run: |
-        mkdir -p .nyc_output
         ln -s ${{ inputs.coverage-reports }} coverage
-        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }} --tempDir .nyc_output
+        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}' --tempDir '${{ github.workspace}}/.nyc_output'
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
