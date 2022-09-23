@@ -4,7 +4,6 @@ description: 'Merge Istanbul coverage reports'
 branding:
   icon: 'git-merge'
   color: 'green'
-shell: bash
 inputs:
   coverage-reports:
     description: 'Path to coverage reports'
@@ -42,6 +41,7 @@ runs:
           ${{ runner.os }}-node-
 
     - name: Install dependencies
+      shell: bash
       run: yarn install --frozen-lockfile --non-interactive --prefer-offline
 
     - name: Get coverage files
@@ -101,6 +101,7 @@ runs:
           core.setOutput('reporters', reporterConfig);
 
     - name: Output coverage reports
+      shell: bash
       run: |
         ln -s ${{ inputs.coverage-reports }} coverage
         nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir '${{ inputs.output-folder }}'
