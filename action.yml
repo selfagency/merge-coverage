@@ -44,44 +44,11 @@ runs:
       shell: bash
       run: npm ci
 
-    - name: Get coverage files
-      id: get-coverage-files
-      uses: tj-actions/glob@v13.1
-      with:
-        working-directory: ${{ inputs.coverage-reports }}
-        separator: ','
-        files: |
-          **/*.json
-
     - name: Merge coverage reports
-      id: merge-coverage
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const istanbul = require('${{ github.workspace }}/node_modules/istanbul-lib-coverage');
-          const {readFile, writeFile} = require('fs/promises');
-          const coverageDir = '${{ inputs.coverage-reports }}';
-          const outputDir = '${{ github.workspace }}/.nyc_output';
-          const coverageFiles = '${{ steps.get-coverage-files.outputs.paths }}'.split(',');
-
-          if (coverageFiles.length) {
-            const map = istanbul.createCoverageMap({});
-            for (const file of coverageFiles) {
-              core.debug(file);
-              if (file.endsWith('coverage-final.json')) {
-                const data = await readFile(`${coverageDir}/${file}`, 'utf8');
-                core.debug(data);
-                map.merge(JSON.parse(data));
-              }
-            }
-
-            core.debug(`Merged reports: ${JSON.stringify(map)}`);
-            await io.mkdirP(outputDir);
-            await writeFile(`${outputDir}/out.json`, JSON.stringify(map));
-          } else {
-            core.notice('No coverage files found');
-            core.setOutput('skip', true);
-          }
+      shell: bash
+      run: |
+        ln -s ${{ inputs.coverage-reports }} .nyc_output
+        ${{ github.workspace }}/node_modules/.bin/nyc merge .nyc_output .nyc_output/out.json
 
     - name: Configure reporters
       id: configure-reporters
