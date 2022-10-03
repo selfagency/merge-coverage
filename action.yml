@@ -63,7 +63,7 @@ runs:
         ls -la ${{ inputs.coverage-reports }}
         ln -s ${{ inputs.coverage-reports }} .nyc_output
         ls -la .nyc_output
-        ${{ github.workspace }}/node_modules/.bin/nyc merge .nyc_output .nyc_output/out.json
+        ${{ github.workspace }}/node_modules/.bin/nyc merge $(find .nyc_output -name "coverage-report.json") .nyc_output/out.json
         cat .nyc_output/out.json
 
     - name: Output coverage reports
