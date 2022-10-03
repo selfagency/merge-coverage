@@ -57,15 +57,15 @@ runs:
     - name: Do the stuff
       shell: bash
       run: |
-        echo "::debug::***** INSTALLING NODE PACKAGES *****"
+        echo "::debug::INSTALLING NODE PACKAGES"
         npm ci
-        echo "::debug::***** LINKING REPORT FOLDER TO `.nyc_output` *****"
+        echo "::debug::LINKING REPORT FOLDER TO `.nyc_output`"
         ln -s ${{ inputs.coverage-reports }} .nyc_output
         ls -la .nyc_output
-        echo "::debug::***** MERGING COVERAGE REPORTS *****"
+        echo "::debug::MERGING COVERAGE REPORTS"
         ${{ github.workspace }}/node_modules/.bin/nyc merge .nyc_output .nyc_output/out.json
         echo "::debug::$(cat .nyc_output/out.json)"
-        echo "::debug::***** GENERATING FINAL REPORT *****"
+        echo "::debug::GENERATING FINAL REPORT"
         ${{ github.workspace }}/node_modules/.bin/nyc report --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
