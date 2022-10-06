@@ -31,6 +31,7 @@ runs:
 
     - name: Cache dependencies
       uses: actions/cache@v2
+      id: cache
       with:
         path: '**/node_modules'
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -52,6 +53,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       run: npm ci
 
     - name: Collect coverage reports
@@ -70,7 +72,7 @@ runs:
       run: |
         mkdir -p ${{ github.workspace }}/.nyc_output
         ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
+        echo "::debug::$(cat ${{ github.workspace }}/coverage/coverage-final.json)"
 
     - name: Output coverage report
       shell: bash
