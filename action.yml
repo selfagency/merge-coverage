@@ -62,9 +62,9 @@ runs:
       run: |
         ls -la ${{ inputs.coverage-reports }}
         ln -s ${{ inputs.coverage-reports }} .nyc_output
-        ls -la .nyc_output
-        ${{ github.workspace }}/node_modules/.bin/istanbul-merge $(find .nyc_output -name "coverage-final.json") .nyc_output/coverage-final.json
-        cat .nyc_output/out.json
+        echo "::debug::$(find .nyc_output -name 'coverage-final.json')"
+        ${{ github.workspace }}/node_modules/.bin/istanbul-merge $(find .nyc_output -name "coverage-final.json") --out .nyc_output/coverage-final.json
+        echo "::notice::$(cat .nyc_output/coverage-final.json)"
 
     - name: Output coverage reports
       shell: bash
