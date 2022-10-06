@@ -60,10 +60,9 @@ runs:
     - name: Merge coverage reports
       shell: bash
       run: |
-        ls -la ${{ inputs.coverage-reports }}
-        ln -s ${{ inputs.coverage-reports }} .nyc_output
-        echo "::debug::$(find .nyc_output -name 'coverage-final.json')"
-        ${{ github.workspace }}/node_modules/.bin/istanbul-merge $(find .nyc_output -name "coverage-final.json") --out .nyc_output/coverage-final.json
+        mkdir -p .nyc_output
+        echo "::debug::$(find ${{ inputs.coverage-reports }} -name 'coverage-final.json')"
+        ${{ github.workspace }}/node_modules/.bin/istanbul-merge $(find ${{ inputs.coverage-reports }} -name "coverage-final.json") --out .nyc_output/coverage-final.json
         echo "::notice::$(cat .nyc_output/coverage-final.json)"
 
     - name: Output coverage reports
