@@ -63,9 +63,9 @@ runs:
         script: |
           const {readDir, writeFile, copyFile, mkdir} = require('fs').promises;
           await mkdir(`${{ github.workspace }}/coverage`);
-          const reportDirs = (await readDir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+          const reportDirs = (await readDir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name));
           reportDirs.forEach(dir => {
-            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`);
+            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`)
           });
 
     - name: Merge coverage
