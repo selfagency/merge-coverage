@@ -57,13 +57,22 @@ runs:
       shell: bash
       run: npm ci
 
+    - name: Collect coverage reports
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const {readDir, writeFile, copyFile, mkdir} = require('fs').promises;
+          await mkdir(`${{ github.workspace }}/coverage`);
+          const reportDirs = (await readDir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+          reportDirs.forEach(dir => {
+            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`);
+          });
+
     - name: Merge coverage
       shell: bash
       run: |
         mkdir -p ${{ github.workspace }}/.nyc_output
-        cp -R ${{ inputs.coverage-reports }}/. ${{ github.workspace }}/.nyc_output
-        echo "::debug::$(find ${{ inputs.coverage-reports }} -name 'coverage-final.json')"
-        ${{ github.workspace }}/node_modules/.bin/istanbul-merge $(find ${{ inputs.coverage-reports }} -name "coverage-final.json") --out ${{ github.workspace }}/.nyc_output/coverage-final.json
+        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/.nyc_output/coverage-final.json
         echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
@@ -71,8 +80,7 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ github.workspace }}
       run: |
-        ${{ github.workspace }}/node_modules/.bin/nyc report --temp-dir ${{ github.workspace }}/.nyc_output --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
-        ls -la ${{ inputs.output-folder }}
+        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
