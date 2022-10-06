@@ -71,7 +71,7 @@ runs:
       shell: bash
       run: |
         mkdir -p ${{ github.workspace }}/.nyc_output
-        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/.nyc_output/coverage-final.json
+        ${{ github.workspace }}/node_modules/.bin/nyc merge --temp-dir ${{ github.workspace }}/.nyc_output ${{ github.workspace }}/coverage ${{ github.workspace }}/.nyc_output/coverage-final.json
         echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
