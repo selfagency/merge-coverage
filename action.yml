@@ -61,9 +61,9 @@ runs:
       uses: actions/github-script@v6
       with:
         script: |
-          const {readDir, writeFile, copyFile, mkdir} = require('fs').promises;
+          const {readdir, writeFile, copyFile, mkdir} = require('fs').promises;
           await mkdir(`${{ github.workspace }}/coverage`);
-          const reportDirs = (await readDir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name));
+          const reportDirs = (await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name));
           for (const dir of reportDirs) {
             await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`)
           };
