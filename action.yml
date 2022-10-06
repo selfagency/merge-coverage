@@ -71,15 +71,15 @@ runs:
       shell: bash
       run: |
         mkdir -p ${{ github.workspace }}/.nyc_output
-        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        echo "::debug::$(cat ${{ github.workspace }}/coverage/coverage-final.json)"
+        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/.nyc_output/coverage-final.json
+        echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ github.workspace }}
       run: |
-        ${{ github.workspace }}/node_modules/.bin/nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
+        ${{ github.workspace }}/node_modules/.bin/nyc report --tempDir ${{ github.workspace }}/.nyc_output --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --reportDir ${{ inputs.output-folder }}
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
@@ -90,3 +90,4 @@ runs:
         path: |
           ${{ inputs.output-folder }}
           ${{ github.workspace }}/.nyc_output
+          ${{ github.workspace }}/coverage
