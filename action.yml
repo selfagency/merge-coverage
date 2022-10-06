@@ -7,15 +7,12 @@ branding:
 inputs:
   coverage-reports:
     description: 'Path to coverage reports'
-    type: string
     required: true
   output-folder:
     description: 'Where to output results'
-    type: string
     required: true
   formats:
     description: 'Comma-separated list of formats to output'
-    type: string
     required: true
 outputs:
   summary:
@@ -63,7 +60,7 @@ runs:
         script: |
           const {readdir, writeFile, copyFile, mkdir} = require('fs').promises;
           await mkdir(`${{ github.workspace }}/coverage`);
-          const reportDirs = (await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true }).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name));
+          const reportDirs = (await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
           for (const dir of reportDirs) {
             await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`)
           };
