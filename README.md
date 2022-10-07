@@ -1,20 +1,18 @@
-# Merge Istanbul coverage reports GitHub Action
+# Merge coverage reports GitHub Action
 
-Merge Istanbul coverage reports into a single report.
-
-Outputs:
+GitHub Action to merge coverage reports from parallelized test runners into a single report. 
 
 ## Inputs
 
-All fields are required.
+- `source`*: Path to source code (usually `${{ github.workspace }}`)
+- `coverage-reports`*: Path to coverage reports (usually `${{ github.workspace }}/coverage`)
+- `output-folder`*: Where to output merged reports
+- `formats`: Comma-separated list of formats to output (`text`, `json`, and `json-summary` are always included)
+  - Options include `cobertura`, `clover`, `lcov`, `teamcity`, `text-loc`.
 
-- `source`: Path to the source folder (usually `${{ github.workspace }}`)
-- `coverage-reports`: Path to coverage reports (usually `${{ github.workspace }}/coverage`)
-- `output-folder`: Where to output merged reports
-- `formats`: Comma-separated list of report formats (ie., `json,lcov`)
-  - Options include `cobertura`, `clover`, `json`, `lcov`, `teamcity`, `text-loc`, `text`. `text-summary` and `json-summary` are always included.
+*Required field
 
 ## Outputs
 
-- `summary`: Coverage summary
-- `json`: JSON coverage summary
+- `report`: Full coverage report
+- `json-summary`: JSON coverage summary

@@ -12,19 +12,16 @@ inputs:
     description: 'Path to coverage reports'
     required: true
   output-folder:
-    description: 'Where to output results'
+    description: 'Where to output merged reports'
     required: true
   formats:
     description: 'Comma-separated list of formats to output'
-    required: true
+    required: false
 outputs:
   report:
     description: 'Coverage report'
     value: steps.merge-coverage.outputs.report
-  summary:
-    description: 'Coverage summary'
-    value: steps.merge-coverage.outputs.summary
-  json:
+  json-summary:
     description: 'JSON coverage summary'
     value: steps.merge-coverage.outputs.json
 runs:
@@ -42,11 +39,13 @@ runs:
       with:
         script: |
           const reporters = '${{ inputs.formats }}'.split(',');
-          let reporterConfig = '';
-          reporters.forEach(reporter => {
-            reporterConfig += `--reporter ${reporter} `;
-          });
-          core.setOutput('reporters', reporterConfig);
+          if (reporters.length) {
+            let reporterConfig = '';
+            reporters.forEach(reporter => {
+              reporterConfig += `--reporter ${reporter} `;
+            });
+            core.setOutput('reporters', reporterConfig);
+          }
 
     - name: Install dependencies
       shell: bash
@@ -75,32 +74,20 @@ runs:
       shell: bash
       run: |
         nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        # report=$(cat ${{ github.workspace }}/coverage/coverage-final.json)
-        # report="${report//'%'/'%25'}"
-        # report="${report//$'\n'/'%0A'}"
-        # report="${report//$'\r'/'%0D'}"
-        # echo -e "::debug::${report}"
 
     - name: Output coverage report
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ inputs.source }}
       run: |
-        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
-        nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee ${{ inputs.output-folder }}/coverage-summary.txt
-
+        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
+        
         report=$(cat ${{ inputs.output-folder }}/coverage-final.txt)
         report="${report//'%'/'%25'}"
         report="${report//$'\n'/'%0A'}"
         report="${report//$'\r'/'%0D'}"
         echo -e "::set-output name=report::${report}"
         echo -e "::notice::Code Coverage Report%0A%0A${report}"
-        
-        summary=$(cat ${{ inputs.output-folder }}/coverage-summary.txt)
-        summary="${summary//'%'/'%25'}"
-        summary="${summary//$'\n'/'%0A'}"
-        summary="${summary//$'\r'/'%0D'}"
-        echo -e "::set-output name=summary::${summary}"
         
         json=$(cat ${{ inputs.output-folder }}/coverage-summary.json)
         json="${json//'%'/'%25'}"
