@@ -5,6 +5,9 @@ branding:
   icon: 'git-merge'
   color: 'green'
 inputs:
+  source:
+    description: 'Path to source code'
+    required: true
   coverage-reports:
     description: 'Path to coverage reports'
     required: true
@@ -70,16 +73,16 @@ runs:
     - name: Merge coverage
       shell: bash
       run: |
-        mkdir -p ${{ github.workspace }}/.nyc_output
-        ${{ github.workspace }}/node_modules/.bin/nyc merge --temp-dir ${{ github.workspace }}/.nyc_output ${{ github.workspace }}/coverage ${{ github.workspace }}/.nyc_output/coverage-final.json
+        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
         echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
       shell: bash
       if: ${{ !steps.merge-coverage.outputs.skip }}
-      working-directory: ${{ github.workspace }}
+      working-directory: ${{ inputs.source }}
       run: |
-        ${{ github.workspace }}/node_modules/.bin/nyc report --temp-dir ${{ github.workspace }}/.nyc_output --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }}
+        ${{ github.workspace }}/node_modules/.bin/nyc report --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }}
+        echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
@@ -89,5 +92,4 @@ runs:
         name: coverage-reports
         path: |
           ${{ inputs.output-folder }}
-          ${{ github.workspace }}/.nyc_output
           ${{ github.workspace }}/coverage
