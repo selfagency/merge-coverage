@@ -27,6 +27,11 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        repository: 'selfagency/merge-coverage'
+
     - name: Setup Node
       uses: actions/setup-node@v2
       with:
