@@ -1,6 +1,6 @@
 {
   "name": "merge-coverage",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Merge Istanbul coverage reports",
   "repository": {
     "type": "git",
