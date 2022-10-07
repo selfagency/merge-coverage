@@ -64,7 +64,7 @@ runs:
     - name: Merge coverage
       shell: bash
       run: |
-        ${{ github.workspace }}/node_modules/.bin/nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
+        nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
         echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
@@ -72,7 +72,7 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ inputs.source }}
       run: |
-        ${{ github.workspace }}/node_modules/.bin/nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }}
+        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }}
         echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
