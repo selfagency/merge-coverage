@@ -82,8 +82,8 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ inputs.source }}
       run: |
-        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee coverage-final.txt
-        nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee coverage-summary.txt
+        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
+        nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee ${{ inputs.output-folder }}/coverage-summary.txt
         echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
         echo "::set-output name=report::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
         echo "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
