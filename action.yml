@@ -27,24 +27,10 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-      with:
-        repository: 'selfagency/merge-coverage'
-
     - name: Setup Node
       uses: actions/setup-node@v2
       with:
         node-version: 16
-
-    - name: Cache dependencies
-      uses: actions/cache@v2
-      id: cache
-      with:
-        path: '**/node_modules'
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
 
     - name: Configure reporters
       id: configure-reporters
@@ -62,7 +48,7 @@ runs:
     - name: Install dependencies
       shell: bash
       if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      run: npm ci
+      run: npm i -g nyc
 
     - name: Collect coverage reports
       uses: actions/github-script@v6
