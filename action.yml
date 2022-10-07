@@ -75,7 +75,7 @@ runs:
       shell: bash
       run: |
         nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        echo "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
+        echo -e "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
 
     - name: Output coverage report
       shell: bash
@@ -84,10 +84,9 @@ runs:
       run: |
         nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
         nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee ${{ inputs.output-folder }}/coverage-summary.txt
-        echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
-        echo "::set-output name=report::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
-        echo "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
-        echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
+        echo -e "::set-output name=report::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
+        echo -e "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
+        echo -e "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v2
