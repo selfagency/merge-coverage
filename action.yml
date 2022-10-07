@@ -75,7 +75,11 @@ runs:
       shell: bash
       run: |
         nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        echo -e "::debug::$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)"
+        report=$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)
+        report="${report//'%'/'%25'}"
+        report="${report//$'\n'/'%0A'}"
+        report="${report//$'\r'/'%0D'}"
+        echo -e "::debug::${report}"
 
     - name: Output coverage report
       shell: bash
@@ -84,9 +88,24 @@ runs:
       run: |
         nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
         nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee ${{ inputs.output-folder }}/coverage-summary.txt
-        echo -e "::set-output name=report::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
-        echo -e "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
-        echo -e "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
+
+        report=$(cat ${{ inputs.output-folder }}/coverage-final.txt)
+        report="${report//'%'/'%25'}"
+        report="${report//$'\n'/'%0A'}"
+        report="${report//$'\r'/'%0D'}"
+        echo -e "::set-output name=report::${report}"
+        
+        summary=$(cat ${{ inputs.output-folder }}/coverage-summary.txt)
+        summary="${summary//'%'/'%25'}"
+        summary="${summary//$'\n'/'%0A'}"
+        summary="${summary//$'\r'/'%0D'}"
+        echo -e "::set-output name=summary::${summary}"
+        
+        json=$(cat ${{ inputs.output-folder }}/coverage-summary.json)
+        json="${json//'%'/'%25'}"
+        json="${json//$'\n'/'%0A'}"
+        json="${json//$'\r'/'%0D'}"
+        echo -e "::set-output name=json::${json}"
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v2
