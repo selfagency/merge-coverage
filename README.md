@@ -16,3 +16,16 @@ GitHub Action to merge coverage reports from parallelized test runners into a si
 
 - `report`: Full coverage report
 - `json-summary`: JSON coverage summary
+
+## Usage
+
+```yaml
+  - name: Merge coverage reports
+    id: coverage
+    uses: selfagency/merge-coverage@v1.1.0
+    with:
+      source: ${{ github.workspace }}/${{ inputs.package }}
+      coverage-reports: ${{ github.workspace }}/${{ inputs.package }}/coverage
+      output-folder: ${{ github.workspace }}/${{ inputs.package }}/coverage-reports
+      formats: html
+```
