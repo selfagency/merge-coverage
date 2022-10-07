@@ -75,11 +75,11 @@ runs:
       shell: bash
       run: |
         nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
-        report=$(cat ${{ github.workspace }}/.nyc_output/coverage-final.json)
-        report="${report//'%'/'%25'}"
-        report="${report//$'\n'/'%0A'}"
-        report="${report//$'\r'/'%0D'}"
-        echo -e "::debug::${report}"
+        # report=$(cat ${{ github.workspace }}/coverage/coverage-final.json)
+        # report="${report//'%'/'%25'}"
+        # report="${report//$'\n'/'%0A'}"
+        # report="${report//$'\r'/'%0D'}"
+        # echo -e "::debug::${report}"
 
     - name: Output coverage report
       shell: bash
