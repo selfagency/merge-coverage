@@ -94,6 +94,7 @@ runs:
         report="${report//$'\n'/'%0A'}"
         report="${report//$'\r'/'%0D'}"
         echo -e "::set-output name=report::${report}"
+        echo -e "::notice::${report}"
         
         summary=$(cat ${{ inputs.output-folder }}/coverage-summary.txt)
         summary="${summary//'%'/'%25'}"
