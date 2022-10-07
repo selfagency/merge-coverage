@@ -18,6 +18,9 @@ inputs:
     description: 'Comma-separated list of formats to output'
     required: true
 outputs:
+  report:
+    description: 'Coverage report'
+    value: steps.merge-coverage.outputs.report
   summary:
     description: 'Coverage summary'
     value: steps.merge-coverage.outputs.summary
@@ -56,10 +59,17 @@ runs:
         script: |
           const {readdir, writeFile, copyFile, mkdir} = require('fs').promises;
           await mkdir(`${{ github.workspace }}/coverage`);
-          const reportDirs = (await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+          const reports = await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true });
+          
+          const reportDirs = reports.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);       
           for (const dir of reportDirs) {
-            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/coverage-${dir}.json`)
-          };
+            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/${dir}.json`)
+          }; 
+          
+          const reportFiles = reports.filter(dirent => dirent.isFile() && dirent.name.includes('.json')).map(dirent => dirent.name);
+          for (const file of reportFiles) {
+            await copyFile(`${{ inputs.coverage-reports }}/${file}`, `${{ github.workspace }}/coverage/${file}.json`)
+          }; 
 
     - name: Merge coverage
       shell: bash
@@ -72,8 +82,11 @@ runs:
       if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ inputs.source }}
       run: |
-        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary --reporter text-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }}
+        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee coverage-final.txt
+        nyc report -t ${{ github.workspace }}/coverage --reporter text-summary | tee coverage-summary.txt
         echo "::notice::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
+        echo "::set-output name=report::$(cat ${{ inputs.output-folder }}/coverage-final.txt)"
+        echo "::set-output name=summary::$(cat ${{ inputs.output-folder }}/coverage-summary.txt)"
         echo "::set-output name=json::$(cat ${{ inputs.output-folder }}/coverage-summary.json)"
 
     - name: Upload coverage reports

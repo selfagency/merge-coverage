@@ -8,7 +8,8 @@ Outputs:
 
 All fields are required.
 
-- `coverage-reports`: Path to coverage reports (usually `${{ github.workspace }}/coverage`);
+- `source`: Path to the source folder (usually `${{ github.workspace }}`)
+- `coverage-reports`: Path to coverage reports (usually `${{ github.workspace }}/coverage`)
 - `output-folder`: Where to output merged reports
 - `formats`: Comma-separated list of report formats (ie., `json,lcov`)
   - Options include `cobertura`, `clover`, `json`, `lcov`, `teamcity`, `text-loc`, `text`. `text-summary` and `json-summary` are always included.
