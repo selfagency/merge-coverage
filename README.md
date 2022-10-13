@@ -22,7 +22,7 @@ GitHub Action to merge coverage reports from parallelized test runners into a si
 ```yaml
   - name: Merge coverage reports
     id: coverage
-    uses: selfagency/merge-coverage@v1.1.0
+    uses: selfagency/merge-coverage@v1.1.1
     with:
       source: ${{ github.workspace }}/${{ inputs.package }}
       coverage-reports: ${{ github.workspace }}/${{ inputs.package }}/coverage

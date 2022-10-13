@@ -50,7 +50,7 @@ runs:
     - name: Install dependencies
       shell: bash
       if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      run: npm i -g nyc
+      run: npm i -g nyc @istanbuljs/nyc-config-typescript
 
     - name: Collect coverage reports
       uses: actions/github-script@v6
