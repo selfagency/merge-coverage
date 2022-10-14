@@ -17,6 +17,10 @@ inputs:
   formats:
     description: 'Comma-separated list of formats to output'
     required: false
+  artifacts:
+    description: 'Whether to create artifacts'
+    required: false
+    default: 'true'
 outputs:
   report:
     description: 'Coverage report'
@@ -28,7 +32,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: 16
 
@@ -50,7 +54,7 @@ runs:
     - name: Install dependencies
       shell: bash
       if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      run: npm i -g nyc @istanbuljs/nyc-config-typescript
+      run: npm i -g nyc
 
     - name: Collect coverage reports
       uses: actions/github-script@v6
@@ -77,7 +81,6 @@ runs:
 
     - name: Output coverage report
       shell: bash
-      if: ${{ !steps.merge-coverage.outputs.skip }}
       working-directory: ${{ inputs.source }}
       run: |
         nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
@@ -96,8 +99,8 @@ runs:
         echo -e "::set-output name=json::${json}"
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v2
-      if: ${{ !steps.merge-coverage.outputs.skip }}
+      uses: actions/upload-artifact@v3
+      if: ${{ inputs.artifacts == 'true' }}
       with:
         name: coverage-reports
         path: |
