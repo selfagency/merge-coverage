@@ -99,7 +99,7 @@ runs:
         echo -e "::set-output name=json::${json}"
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ inputs.artifacts == 'true' }}
       with:
         name: coverage-reports
