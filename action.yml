@@ -32,13 +32,13 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
         node-version: 20
 
     - name: Configure reporters
       id: configure-reporters
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       if: ${{ !steps.merge-coverage.outputs.skip }}
       with:
         script: |
@@ -57,22 +57,22 @@ runs:
       run: npm i -g nyc
 
     - name: Collect coverage reports
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const {readdir, writeFile, copyFile, mkdir} = require('fs').promises;
           await mkdir(`${{ github.workspace }}/coverage`);
           const reports = await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true });
-          
-          const reportDirs = reports.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);       
+
+          const reportDirs = reports.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
           for (const dir of reportDirs) {
             await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/${dir}.json`)
-          }; 
-          
+          };
+
           const reportFiles = reports.filter(dirent => dirent.isFile() && dirent.name.includes('.json')).map(dirent => dirent.name);
           for (const file of reportFiles) {
             await copyFile(`${{ inputs.coverage-reports }}/${file}`, `${{ github.workspace }}/coverage/${file}.json`)
-          }; 
+          };
 
     - name: Merge coverage
       shell: bash
@@ -84,14 +84,14 @@ runs:
       working-directory: ${{ inputs.source }}
       run: |
         nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
-        
+
         report=$(cat ${{ inputs.output-folder }}/coverage-final.txt)
         report="${report//'%'/'%25'}"
         report="${report//$'\n'/'%0A'}"
         report="${report//$'\r'/'%0D'}"
         echo -e "::set-output name=report::${report}"
         echo -e "::notice::Code Coverage Report%0A%0A${report}"
-        
+
         json=$(cat ${{ inputs.output-folder }}/coverage-summary.json)
         json="${json//'%'/'%25'}"
         json="${json//$'\n'/'%0A'}"
@@ -99,7 +99,7 @@ runs:
         echo -e "::set-output name=json::${json}"
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ inputs.artifacts == 'true' }}
       with:
         name: coverage-reports

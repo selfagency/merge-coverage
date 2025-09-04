@@ -1,17 +1,17 @@
 # Merge coverage reports GitHub Action
 
-GitHub Action to merge coverage reports from parallelized test runners into a single report. 
+GitHub Action to merge coverage reports from parallelized test runners into a single report.
 
 ## Inputs
 
-- `source`*: Path to source code (usually `${{ github.workspace }}`)
-- `coverage-reports`*: Path to coverage reports (usually `${{ github.workspace }}/coverage`)
-- `output-folder`*: Where to output merged reports
+- `source`\*: Path to source code (usually `${{ github.workspace }}`)
+- `coverage-reports`\*: Path to coverage reports (usually `${{ github.workspace }}/coverage`)
+- `output-folder`\*: Where to output merged reports
 - `formats`: Comma-separated list of formats to output (`text`, `json`, and `json-summary` are always included)
   - Options include `cobertura`, `clover`, `lcov`, `teamcity`, `text-loc`
 - `artifacts`: Whether to upload the merged reports as artifacts (`true`/`false`), defaults to `true`
 
-*Required field
+\*Required field
 
 ## Outputs
 
@@ -21,13 +21,13 @@ GitHub Action to merge coverage reports from parallelized test runners into a si
 ## Usage
 
 ```yaml
-  - name: Merge coverage reports
-    id: coverage
-    uses: selfagency/merge-coverage@v1.1.2
-    with:
-      source: ${{ github.workspace }}/${{ inputs.package }}
-      coverage-reports: ${{ github.workspace }}/${{ inputs.package }}/coverage
-      output-folder: ${{ github.workspace }}/${{ inputs.package }}/coverage-reports
-      formats: html
-      artifacts: false
+- name: Merge coverage reports
+  id: coverage
+  uses: selfagency/merge-coverage@v1.2.0
+  with:
+    source: ${{ github.workspace }}/${{ inputs.package }}
+    coverage-reports: ${{ github.workspace }}/${{ inputs.package }}/coverage
+    output-folder: ${{ github.workspace }}/${{ inputs.package }}/coverage-reports
+    formats: html
+    artifacts: false
 ```
