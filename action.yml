@@ -24,82 +24,104 @@ inputs:
 outputs:
   report:
     description: 'Coverage report'
-    value: steps.merge-coverage.outputs.report
+    value: ${{ steps.merge-coverage.outputs.report }}
   json-summary:
     description: 'JSON coverage summary'
-    value: steps.merge-coverage.outputs.json
+    value: ${{ steps.merge-coverage.outputs.json }}
 runs:
   using: 'composite'
   steps:
     - name: Setup Node
-      uses: actions/setup-node@v5
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
       with:
         node-version: 20
 
     - name: Configure reporters
       id: configure-reporters
-      uses: actions/github-script@v7
-      if: ${{ !steps.merge-coverage.outputs.skip }}
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      env:
+        INPUT_FORMATS: ${{ inputs.formats }}
       with:
         script: |
-          const reporters = '${{ inputs.formats }}'.split(',');
+          const formats = process.env.INPUT_FORMATS || '';
+          const reporters = formats
+            .split(',')
+            .map(r => r.trim())
+            .filter(r => /^[a-z][a-z0-9-]*$/i.test(r));
           if (reporters.length) {
-            let reporterConfig = '';
-            reporters.forEach(reporter => {
-              reporterConfig += `--reporter ${reporter} `;
-            });
+            const reporterConfig = reporters.map(r => `--reporter ${r}`).join(' ');
             core.setOutput('reporters', reporterConfig);
           }
 
-    - name: Install dependencies
-      shell: bash
-      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-      run: npm i -g nyc
-
     - name: Collect coverage reports
-      uses: actions/github-script@v7
+      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      env:
+        COVERAGE_REPORTS: ${{ inputs.coverage-reports }}
+        WORKSPACE: ${{ github.workspace }}
       with:
         script: |
-          const {readdir, writeFile, copyFile, mkdir} = require('fs').promises;
-          await mkdir(`${{ github.workspace }}/coverage`);
-          const reports = await readdir('${{ inputs.coverage-reports }}', { withFileTypes: true });
+          const { readdir, copyFile, mkdir } = require('fs').promises;
+          const path = require('path');
 
-          const reportDirs = reports.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name);
+          const coverageDir = path.join(process.env.WORKSPACE, 'coverage');
+          await mkdir(coverageDir, { recursive: true });
+
+          const reports = await readdir(process.env.COVERAGE_REPORTS, { withFileTypes: true });
+
+          const reportDirs = reports.filter(d => d.isDirectory()).map(d => d.name);
           for (const dir of reportDirs) {
-            await copyFile(`${{ inputs.coverage-reports }}/${dir}/coverage-final.json`, `${{ github.workspace }}/coverage/${dir}.json`)
-          };
+            await copyFile(
+              path.join(process.env.COVERAGE_REPORTS, dir, 'coverage-final.json'),
+              path.join(coverageDir, `${dir}.json`)
+            );
+          }
 
-          const reportFiles = reports.filter(dirent => dirent.isFile() && dirent.name.includes('.json')).map(dirent => dirent.name);
+          const reportFiles = reports.filter(d => d.isFile() && d.name.endsWith('.json')).map(d => d.name);
           for (const file of reportFiles) {
-            await copyFile(`${{ inputs.coverage-reports }}/${file}`, `${{ github.workspace }}/coverage/${file}.json`)
-          };
+            await copyFile(
+              path.join(process.env.COVERAGE_REPORTS, file),
+              path.join(coverageDir, file)
+            );
+          }
 
     - name: Merge coverage
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
       run: |
-        nyc merge ${{ github.workspace }}/coverage ${{ github.workspace }}/coverage/coverage-final.json
+        npx nyc merge "${WORKSPACE}/coverage" "${WORKSPACE}/coverage/coverage-final.json"
 
     - name: Output coverage report
+      id: merge-coverage
       shell: bash
       working-directory: ${{ inputs.source }}
+      env:
+        WORKSPACE: ${{ github.workspace }}
+        OUTPUT_FOLDER: ${{ inputs.output-folder }}
+        REPORTERS: ${{ steps.configure-reporters.outputs.reporters }}
       run: |
-        nyc report -t ${{ github.workspace }}/coverage --reporter text --reporter json --reporter json-summary ${{ steps.configure-reporters.outputs.reporters }} --report-dir ${{ inputs.output-folder }} | tee ${{ inputs.output-folder }}/coverage-final.txt
+        npx nyc report -t "${WORKSPACE}/coverage" --reporter text --reporter json --reporter json-summary ${REPORTERS} --report-dir "${OUTPUT_FOLDER}" | tee "${OUTPUT_FOLDER}/coverage-final.txt"
 
-        report=$(cat ${{ inputs.output-folder }}/coverage-final.txt)
+        {
+          echo "report<<COVERAGE_REPORT_EOF"
+          cat "${OUTPUT_FOLDER}/coverage-final.txt"
+          echo "COVERAGE_REPORT_EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        report=$(cat "${OUTPUT_FOLDER}/coverage-final.txt")
         report="${report//'%'/'%25'}"
         report="${report//$'\n'/'%0A'}"
         report="${report//$'\r'/'%0D'}"
-        echo -e "::set-output name=report::${report}"
-        echo -e "::notice::Code Coverage Report%0A%0A${report}"
+        echo "::notice::Code Coverage Report%0A%0A${report}"
 
-        json=$(cat ${{ inputs.output-folder }}/coverage-summary.json)
-        json="${json//'%'/'%25'}"
-        json="${json//$'\n'/'%0A'}"
-        json="${json//$'\r'/'%0D'}"
-        echo -e "::set-output name=json::${json}"
+        {
+          echo "json<<COVERAGE_JSON_EOF"
+          cat "${OUTPUT_FOLDER}/coverage-summary.json"
+          echo "COVERAGE_JSON_EOF"
+        } >> "$GITHUB_OUTPUT"
 
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
       if: ${{ inputs.artifacts == 'true' }}
       with:
         name: coverage-reports
