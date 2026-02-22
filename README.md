@@ -1,5 +1,7 @@
 # Merge coverage reports GitHub Action
 
+[![Tests](https://github.com/selfagency/merge-coverage/actions/workflows/test-merge-coverage.yml/badge.svg)](https://github.com/selfagency/merge-coverage/actions/workflows/test-merge-coverage.yml)
+
 GitHub Action to merge coverage reports from parallelized test runners into a single report.
 
 ## Inputs
