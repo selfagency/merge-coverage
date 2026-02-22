@@ -23,31 +23,37 @@ jobs:
           set -eu
           mkdir -p tests/coverage/service-a tests/coverage/service-b
 
+          # service-a: 1 statement, covered
           cat > tests/coverage/service-a/coverage-final.json <<'JSON'
           {
             "service-a/file.js": {
-              "lines": {"total": 1, "covered": 1, "skipped": 0, "pct": 100},
-              "branches": {},
-              "functions": {},
-              "statements": {}
+              "path": "service-a/file.js",
+              "statementMap": {"1": {"start": {"line":1,"column":0}, "end": {"line":1,"column":10}}},
+              "fnMap": {},
+              "branchMap": {},
+              "s": {"1": 1},
+              "f": {},
+              "b": {}
             }
           }
           JSON
 
+          # service-b: 2 statements, one covered
           cat > tests/coverage/service-b/coverage-final.json <<'JSON'
           {
             "service-b/file.js": {
-              "lines": {"total": 2, "covered": 1, "skipped": 0, "pct": 50},
-              "branches": {},
-              "functions": {},
-              "statements": {}
+              "path": "service-b/file.js",
+              "statementMap": {
+                "1": {"start": {"line":1,"column":0}, "end": {"line":1,"column":10}},
+                "2": {"start": {"line":2,"column":0}, "end": {"line":2,"column":10}}
+              },
+              "fnMap": {},
+              "branchMap": {},
+              "s": {"1": 1, "2": 0},
+              "f": {},
+              "b": {}
             }
           }
-          JSON
-
-          # add a simple top-level json file as well
-          cat > tests/coverage/coverage.json <<'JSON'
-          { "root": {} }
           JSON
 
       - name: Run merge-coverage action
