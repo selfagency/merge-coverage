@@ -1,0 +1,88 @@
+name: Test Merge Coverage Action
+
+on:
+  push:
+    paths:
+      - "action.yml"
+  pull_request:
+    paths:
+      - "action.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run action against fake coverage files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create fake coverage reports
+        run: |
+          set -eu
+          mkdir -p tests/coverage/service-a tests/coverage/service-b
+
+          cat > tests/coverage/service-a/coverage-final.json <<'JSON'
+          {
+            "service-a/file.js": {
+              "lines": {"total": 1, "covered": 1, "skipped": 0, "pct": 100},
+              "branches": {},
+              "functions": {},
+              "statements": {}
+            }
+          }
+          JSON
+
+          cat > tests/coverage/service-b/coverage-final.json <<'JSON'
+          {
+            "service-b/file.js": {
+              "lines": {"total": 2, "covered": 1, "skipped": 0, "pct": 50},
+              "branches": {},
+              "functions": {},
+              "statements": {}
+            }
+          }
+          JSON
+
+          # add a simple top-level json file as well
+          cat > tests/coverage/coverage.json <<'JSON'
+          { "root": {} }
+          JSON
+
+      - name: Run merge-coverage action
+        uses: ./
+        with:
+          source: .
+          coverage-reports: tests/coverage
+          output-folder: out/coverage
+          formats: lcov,text
+          artifacts: "false"
+
+      - name: Verify coverage outputs and contents
+        run: |
+          set -euo pipefail
+          echo "Contents of out/coverage:"
+          ls -la out/coverage || (echo "out/coverage not found" && exit 1)
+
+          if [ ! -f out/coverage/coverage-final.txt ]; then
+            echo "coverage-final.txt missing"; exit 2
+          fi
+          if [ ! -f out/coverage/coverage-summary.json ]; then
+            echo "coverage-summary.json missing"; exit 3
+          fi
+
+            echo "Checking coverage-summary.json totals"
+            # install jq for JSON assertions
+            sudo apt-get update -y && sudo apt-get install -y jq >/dev/null
+
+            if ! jq -e '(.total.lines.total==3) and (.total.lines.covered==2) and (.total.lines.pct>66 and .total.lines.pct<67.5)' out/coverage/coverage-summary.json >/dev/null; then
+            echo "coverage-summary.json does not meet expected totals"; jq '.' out/coverage/coverage-summary.json; exit 8
+            fi
+            echo '✔ coverage-summary.json totals OK'
+
+            echo "Checking coverage-final.txt for a textual report"
+          if ! grep -E 'All files|service-a|service-b|Lines' out/coverage/coverage-final.txt >/dev/null 2>&1; then
+            echo "text coverage report does not appear to include expected content"; exit 9
+          fi
+          echo "✅ coverage outputs validated"
