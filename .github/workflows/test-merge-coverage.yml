@@ -92,3 +92,12 @@ jobs:
             echo "text coverage report does not appear to include expected content"; exit 9
           fi
           echo "✅ coverage outputs validated"
+
+          - name: Tests pass
+            uses: mapbox/create-status-check@v2
+            with:
+              authToken: ${{secrets.GITHUB_TOKEN}}
+              context: 'Test run'
+              description: 'Passed'
+              state: 'success'
+              sha: ${{github.event.pull_request.head.sha || github.sha}}
