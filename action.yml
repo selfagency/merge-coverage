@@ -100,6 +100,7 @@ runs:
         OUTPUT_FOLDER: ${{ inputs.output-folder }}
         REPORTERS: ${{ steps.configure-reporters.outputs.reporters }}
       run: |
+        mkdir -p "${OUTPUT_FOLDER}"
         npx nyc report -t "${WORKSPACE}/coverage" --reporter text --reporter json --reporter json-summary ${REPORTERS} --report-dir "${OUTPUT_FOLDER}" | tee "${OUTPUT_FOLDER}/coverage-final.txt"
 
         {

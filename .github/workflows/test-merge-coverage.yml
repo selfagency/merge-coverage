@@ -1,4 +1,4 @@
-name: Test Merge Coverage Action
+name: Tests
 
 on:
   push:
