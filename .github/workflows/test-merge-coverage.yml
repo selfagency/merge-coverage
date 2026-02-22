@@ -93,11 +93,11 @@ jobs:
           fi
           echo "✅ coverage outputs validated"
 
-          - name: Tests pass
-            uses: mapbox/create-status-check@v2
-            with:
-              authToken: ${{secrets.GITHUB_TOKEN}}
-              context: 'Test run'
-              description: 'Passed'
-              state: 'success'
-              sha: ${{github.event.pull_request.head.sha || github.sha}}
+      - name: Tests pass
+        uses: billyjbryant/create-status-check@v2
+        with:
+          authToken: ${{secrets.GITHUB_TOKEN}}
+          context: "Test run"
+          description: "Passed"
+          state: "success"
+          sha: ${{github.event.pull_request.head.sha || github.sha}}
