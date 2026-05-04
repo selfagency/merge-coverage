@@ -60,7 +60,7 @@ runs:
         WORKSPACE: ${{ github.workspace }}
       with:
         script: |
-          const { readdir, copyFile, mkdir } = require('fs').promises;
+          const { readdir, copyFile, mkdir, access } = require('fs').promises;
           const path = require('path');
 
           const coverageDir = path.join(process.env.WORKSPACE, 'coverage');
@@ -70,10 +70,15 @@ runs:
 
           const reportDirs = reports.filter(d => d.isDirectory()).map(d => d.name);
           for (const dir of reportDirs) {
-            await copyFile(
-              path.join(process.env.COVERAGE_REPORTS, dir, 'coverage-final.json'),
-              path.join(coverageDir, `${dir}.json`)
-            );
+            const src = path.join(process.env.COVERAGE_REPORTS, dir, 'coverage-final.json');
+            try {
+              await access(src);
+            } catch (err) {
+              if (err.code !== 'ENOENT') throw err;
+              core.warning(`Skipping ${dir}: coverage-final.json not found`);
+              continue;
+            }
+            await copyFile(src, path.join(coverageDir, `${dir}.json`));
           }
 
           const reportFiles = reports.filter(d => d.isFile() && d.name.endsWith('.json')).map(d => d.name);
