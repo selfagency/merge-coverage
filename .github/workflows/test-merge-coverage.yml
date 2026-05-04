@@ -21,7 +21,7 @@ jobs:
       - name: Create fake coverage reports
         run: |
           set -eu
-          mkdir -p tests/coverage/service-a tests/coverage/service-b
+          mkdir -p tests/coverage/service-a tests/coverage/service-b tests/coverage/service-c
 
           # service-a: 1 statement, covered
           cat > tests/coverage/service-a/coverage-final.json <<'JSON'
@@ -55,6 +55,8 @@ jobs:
             }
           }
           JSON
+
+          # service-c: intentionally missing coverage-final.json to exercise the skip/warn path
 
       - name: Run merge-coverage action
         uses: ./

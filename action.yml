@@ -73,7 +73,8 @@ runs:
             const src = path.join(process.env.COVERAGE_REPORTS, dir, 'coverage-final.json');
             try {
               await access(src);
-            } catch {
+            } catch (err) {
+              if (err.code !== 'ENOENT') throw err;
               core.warning(`Skipping ${dir}: coverage-final.json not found`);
               continue;
             }
