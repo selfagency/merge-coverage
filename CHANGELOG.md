@@ -6,12 +6,15 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
-### Added
+## [2.1.0] - 2026-05-04
 
-- Tests: added GitHub Actions workflow `test-merge-coverage.yml` to validate the composite action using synthetic nyc coverage files and assert merged totals.
-- CI: added `check-action-yml.yml` to validate `action.yml` structure on PRs and pushes.
-- Release tooling: added `set-required-checks.yml` and optional branch-protection steps to configure required status checks via `gh`/ADMIN_TOKEN.
-- Action: ensure output directory is created before generating reports (fixes CI failure when output dir missing).
+### Bug Fixes
+- **Guard against missing `coverage-final.json`** — Subdirectories under `coverage-reports` that do not contain a `coverage-final.json` file are now skipped with a warning instead of causing the action to fail. Only `ENOENT` errors are silently skipped; all other filesystem errors are still propagated. (#4)
+- **Fix action author field** — Corrected the `author` field in `action.yml`.
+
+### Improvements
+- **Add CI status badge to README** — A test workflow status badge is now displayed in the README.
+- **Strengthen test assertions** — The end-to-end test workflow now verifies the step exit status in addition to output content.
 
 ## [2.0.0] - 2026-02-21
 
